@@ -1,6 +1,6 @@
 # CS-5513
 
-##Setup:
+## Setup:
 1) Download Vagrant: https://www.vagrantup.com/downloads.html
 2) Download VirtualBox: https://www.virtualbox.org/wiki/Downloads
 3) CD to your desktop and run 'vagrant init'. This sets up initially where the VMs will be.
