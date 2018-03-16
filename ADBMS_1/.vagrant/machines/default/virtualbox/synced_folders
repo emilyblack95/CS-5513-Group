@@ -1,0 +1,1 @@
+{"virtualbox":{"bootstrap":{"create":true,"owner":null,"group":null,"nfs":false,"transient":false,"extra":null,"id":"bootstrap","guestpath":"/mnt/bootstrap","hostpath":"/Users/emilyblack95/Desktop/CS-5513/ADBMS_1","disabled":false,"__vagrantfile":true}}}
