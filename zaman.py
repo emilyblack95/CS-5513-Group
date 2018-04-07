@@ -4,70 +4,107 @@ import numpy as np
 """
 Re-implemented version of Zaman's auto-indexing clustering algorithm in Python.
 Originally written in Java.
+Authors: Emily Black, Charlie Liu
 Thesis: http://ieeexplore.ieee.org/abstract/document/1333569/
 """
 
 """Initialized variables"""
-int numOfAttrs, numOfQueries
+numOfAttrs = 0
+numOfQueries = 0
+rowIndex = 0
+columnIndex = 0
+numOfRows = 0
+logData = []
+attributes = []
+currentIndexSet = []
+newIndexset = []
+indexesToAdd = []
+indexesToRemove = []
 
 #determined from the relationship between increase in table scan cost & performance gain due to re-indexing
 #use integrated postgresql workload
 #if(workload pattern has changed enough to hit our threshold):
 	#currentIndexSet = DB.getIndexSet()		#get current index set
-	#data = log.in() 						#read input from log on queries
+	#logData = log.in() 						#read input from log on queries in the form of an ARRAY
 
-	#numOfAttrs = data.getAllUniqueAttributes() 	#number of total attributes from all tables
-	#numOfQueries = data.getAllUniqueQueries()		#number of total unique queries read from log
+	#numOfAttrs = DB.countAllUniqueAttributes() 		#number of total attributes from all tables
+	#numOfQueries = logData.countAllUniqueQueries()		#number of total unique queries read from log
+	#attributes = DB.getAllUniqueAttributes()			#list of all unique attributes
+	if numOfAttrs != len(attributes.length):
+		print("ERROR: Number of attributes and actual attributes size mismatched. Aborting.")
+		raise SystemError
 	if numOfAttrs is None or numOfQueries is None:
 		print("ERROR: Unable to retrieve all unique attributes/queries. Aborting.")
 		raise SystemError
 
-#query-attribute matrix
+#query-attribute matrix, index of QUERIES starts at 1
 queryAttrMatrix = np.ndarray(shape=(numOfQueries,numOfAttrs), dtype=int)
 
-#query-frequency matrix, 2 extra rows for freq, freq*T
+#query-frequency matrix, 2 extra rows for freq, freq*T, index of QUERIES starts at 1
 queryFreqMatrix = np.ndarray(shape=(numOfQueries+2,numOfAttrs), dtype=int)
 
-#populate query-attr matrix for clustering
+#populate query-attr matrix for clustering (will contain 1's and 0's)
+for query in logData:
+	for attr in attributes:
+		#found occurrence
+		if query.find(attr) != -1:
+			np.insert(queryAttrMatrix, rowIndex, '1', axis=rowIndex)
+		#didn't find occurrence
+		else:
+			np.insert(queryAttrMatrix, rowIndex, '0', axis=rowIndex)
+		rowIndex += 1
 
-#populate query-freq matrix
-For each row i in matrix M:
-	For each column j in matrix M:
-		If attribute is present in query i:
-			Set M[i][j] = 1 #indexable attribute
-		Else:
-			Set M[i][j] = 0
+#reset our index for query-freq matrix insertion
+rowIndex = 0
 
-#finds which queries should be clustered together - AI PART
-#explain in presentation
-Clusters = kmeans(m) 				#example entries: [(Q1,Q4), Q3, (Q2, Q5)], array of tuples
+#populate query-freq matrix for freq calculations
+for query in logData:
+	for attr in attributes:
+		#found occurrence
+		if query.find(attr) != -1:
+			np.insert(queryFreqMatrix, rowIndex, query.count(attr), axis=rowIndex)
+		#didn't find occurrence
+		else:
+			np.insert(queryAttrMatrix, rowIndex, '0', axis=rowIndex)
+		rowIndex += 1
+
+#reset our index for next workload change
+rowIndex = 0
+
+#cluster queries together based on relatively similar mentioned attributes - Artificial intelligence part
+#number of clusters = k = n_clusters
+#example: [(Q1,Q4), Q3, (Q2, Q5)], array of tuples
+clusterResults = KMeans(n_clusters=3).fit(queryAttrMatrix)
 
 #add frequency totals to query-freq matrix
-m.append(numOfQueries+1, 0) #assumes indexing at 0
-For each column j in matrix M:
-	Sum the rest of the values from the array M[j]
-	Store sum value in m[0]
+while columnIndex != numOfAttrs-1:
+	np.insert(queryFreqMatrix, queryFreqMatrix.size-2, queryFreqMatrix.sum(axis=columnIndex), axis=columnIndex)
+	columnIndex += 1
+
+#reset our index for query-freq matrix insertion
+columnIndex = 0
 
 #add frequency*T totals to query-freq matrix
-m.append(numOfQueries+2, 0) #assumes indexing at 0
-For each column j in matrix M:
-	Sum the rest of the values from the array M[j] * M[j].getTable().getNumOfRows()
-	Store sum*T value in m[0]
+while columnIndex != numOfAttrs-1:
+	#numOfRows = attributes[columnIndex].getNumOfRowsInTable
+	np.insert(queryFreqMatrix, queryFreqMatrix.size-1, queryFreqMatrix.sum(axis=columnIndex) * numOfRows, axis=columnIndex)
+	columnIndex += 1
 
-newIndexSet = Find common candidate indexable attributes across all clusters/queries
+#use thresholds here
+#newIndexSet = Find common candidate indexable attributes across all clusters/queries
 
 #filter out index sets
 #create new indexes which aren’t in old index set
-For index i in newIndexSet:
-    if i not in currentIndexSet:
-   	 create new index i
+for index in newIndexSet:
+    if index not in currentIndexSet:
+   		#indexesToAdd.append(new index i)
 
 #delete old indexes which aren’t in new index set
-For index j in currentIndexSet:
-    if j not in newIndexSet:
-   	 drop old index j
+for index in currentIndexSet:
+    if index not in newIndexSet:
+   		indexesToRemove.append(index)
 
 #postgresql planner/optimizer 43.5
-Pass newIndexSet to PostgreSQL optimizer to have it choose from set of hypothetical indexes, outputs choice/cost estimate for each one
+#Pass newIndexSet to PostgreSQL optimizer to have it choose from set of hypothetical indexes, outputs choice/cost estimate for each one
 
 #from what the optimizer recommends, create indexes from newIndexSet 
