@@ -1,14 +1,32 @@
+from sklearn.cluster import KMeans
+import numpy as np
+
+"""
+Re-implemented version of Zaman's auto-indexing clustering algorithm in Python.
+Originally written in Java.
+Thesis: http://ieeexplore.ieee.org/abstract/document/1333569/
+"""
+
+"""Initialized variables"""
+int numOfAttrs, numOfQueries
+
 #determined from the relationship between increase in table scan cost & performance gain due to re-indexing
-#postgresql workload
-if(workload pattern has changed enough to hit our threshold):
-currentIndexSet = DB.getIndexSet()
-data = log.in() 						#read input from log on queries
+#use integrated postgresql workload
+#if(workload pattern has changed enough to hit our threshold):
+	#currentIndexSet = DB.getIndexSet()		#get current index set
+	#data = log.in() 						#read input from log on queries
 
-Int numOfAttrs = data.getAllUniqueAttributes() 	#number of total attributes from all tables
+	#numOfAttrs = data.getAllUniqueAttributes() 	#number of total attributes from all tables
+	#numOfQueries = data.getAllUniqueQueries()		#number of total unique queries read from log
+	if numOfAttrs is None or numOfQueries is None:
+		print("ERROR: Unable to retrieve all unique attributes/queries. Aborting.")
+		raise SystemError
 
-Int numOfQueries = data.getAllUniqueQueries()	#number of total unique queries read from log
+#query-attribute matrix
+queryAttrMatrix = np.ndarray(shape=(numOfQueries,numOfAttrs), dtype=int)
 
-Matrix m [numOfQueries] [numOfAttrs]		#query-freq matrix
+#query-frequency matrix, 2 extra rows for freq, freq*T
+queryFreqMatrix = np.ndarray(shape=(numOfQueries+2,numOfAttrs), dtype=int)
 
 #populate query-attr matrix for clustering
 
