@@ -24,5 +24,5 @@ where
 group by
 	n_name
 order by
-	revenue desc;
-limit -1;
+	revenue desc
+limit 1;

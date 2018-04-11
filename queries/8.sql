@@ -37,5 +37,5 @@ from
 group by
 	o_year
 order by
-	o_year;
-limit -1;
+	o_year
+limit 1;

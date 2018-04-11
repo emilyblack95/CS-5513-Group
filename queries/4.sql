@@ -21,5 +21,5 @@ where
 group by
 	o_orderpriority
 order by
-	o_orderpriority;
-limit -1;
+	o_orderpriority
+limit 1;

@@ -27,5 +27,5 @@ group by
 				and n_name = 'INDONESIA'
 		)
 order by
-	value desc;
-limit -1;
+	value desc
+limit 1;
