@@ -14,6 +14,8 @@ numOfQueries = 0
 rowIndex = 0
 columnIndex = 0
 numOfRows = 0
+thresholdOne = 0
+thresholdTwo = 0
 logData = []
 attributes = []
 currentIndexSet = []
@@ -24,7 +26,8 @@ indexesToRemove = []
 #determined from the relationship between increase in table scan cost & performance gain due to re-indexing
 #use integrated postgresql workload
 #if(workload pattern has changed enough to hit our threshold):
-	#currentIndexSet = DB.getIndexSet()		#get current index set
+	#currentIndexSet = DB.getIndexSet()		    #get current index set
+	#wlSize = getCurrentWorkload()              #workload size
 	#logData = log.in() 						#read input from log on queries in the form of an ARRAY
 
 	#numOfAttrs = DB.countAllUniqueAttributes() 		#number of total attributes from all tables
@@ -37,6 +40,10 @@ indexesToRemove = []
 		print("ERROR: Unable to retrieve all unique attributes/queries. Aborting.")
 		raise SystemError
 
+#define thresholds to determine indexable candidate attributes
+thresholdOne = wlSize/2
+thresholdTwo = wlSize/4
+		
 #query-attribute matrix, index of QUERIES starts at 1
 queryAttrMatrix = np.ndarray(shape=(numOfQueries,numOfAttrs), dtype=int)
 
