@@ -19,12 +19,14 @@ module Dexter
       execute("SET lock_timeout = '5s'")
     end
 
+    # processes query input
     def process_stat_statements
       queries = stat_statements.map { |q| Query.new(q) }.sort_by(&:fingerprint).group_by(&:fingerprint).map { |_, v| v.first }
       log "Processing #{queries.size} new query fingerprints"
       process_queries(queries)
     end
 
+    # gets statistics of current activity?
     def stat_activity
       execute <<-SQL
         SELECT
@@ -42,6 +44,9 @@ module Dexter
       SQL
     end
 
+    # TODO: add matrix creation, insertion, and k-means stuff here
+    # general method that processes queries, does all method calls, and indexes
+    # RETURNS CANDIDATE INDEXABLE ATTRIBUTES
     def process_queries(queries)
       # reset hypothetical indexes
       reset_hypothetical_indexes
@@ -117,6 +122,7 @@ module Dexter
 
     private
 
+    # defines/creates extension between Dexter and PostgreSQL
     def create_extension
       execute("SET client_min_messages = warning")
       begin
@@ -128,10 +134,12 @@ module Dexter
       end
     end
 
+    # checks if the extension between Dexter and PostgreSQL already exists, and executes SQL
     def extension_exists?
       execute("SELECT * FROM pg_available_extensions WHERE name = 'hypopg' AND installed_version IS NOT NULL").any?
     end
 
+    # executes SQL and resets all hypothetical indexes
     def reset_hypothetical_indexes
       execute("SELECT hypopg_reset()")
     end
@@ -171,6 +179,7 @@ module Dexter
       end
     end
 
+    # gets initial costs for queries
     def calculate_plan(queries)
       queries.each do |query|
         if @log_explain
@@ -192,6 +201,9 @@ module Dexter
       end
     end
 
+    # creates hypothetical indexes given queries and the tables
+    # TODO: change. Add function where you can just pass candidate indexes to be used and it will
+    # create them.
     def create_hypothetical_indexes(queries, tables)
       candidates = {}
 
@@ -237,10 +249,12 @@ module Dexter
       candidates
     end
 
+    # finds all columns given a plan?
     def find_columns(plan)
       find_by_key(plan, "ColumnRef")
     end
 
+    # finds all indexes given a plan?
     def find_indexes(plan)
       find_by_key(plan, "Index Name")
     end
@@ -283,6 +297,10 @@ module Dexter
       query_indexes
     end
 
+    # after process_queries is run, this method is called next
+    # it takes k-means clusters, calculates the frequencies for the queryfreqmatrix
+    # and compares frequencies to thresholds defined above. From there it passes those back to process_queries.
+    # TODO: EDIT THIS
     def determine_indexes(queries, candidates, tables)
       new_indexes = {}
       index_name_to_columns = candidates.invert
@@ -407,6 +425,7 @@ module Dexter
       new_indexes.values.reject { |i| covered.include?([i[:table], i[:columns]]) }.sort_by(&:to_a)
     end
 
+    # logs indexes to a map, with a corresponding table?
     def log_indexes(indexes)
       if indexes.any?
         indexes.map { |i| "#{i[:table]} (#{i[:columns].join(", ")})" }.join(", ")
@@ -415,6 +434,8 @@ module Dexter
       end
     end
 
+    # prints the index and creates it, given the list of new indexes, the queries, and the tables
+    # TODO: useful, use this
     def show_and_create_indexes(new_indexes, queries, tables)
       # print summary
       if new_indexes.any?
@@ -494,6 +515,7 @@ module Dexter
       new_indexes
     end
 
+    # connection method
     def conn
       @conn ||= begin
         # set connect timeout if none set
@@ -516,6 +538,7 @@ module Dexter
       abort e.message
     end
 
+    # executes a given SQL query
     def execute(query)
       # use exec_params instead of exec for security
       #
@@ -544,6 +567,7 @@ module Dexter
       end
     end
 
+    # executes a SQL statement to create a hypothetical index given a table and column set to be indexed?
     def create_hypothetical_index(table, col_set)
       execute("SELECT * FROM hypopg_create_index('CREATE INDEX ON #{quote_ident(table)} (#{col_set.map { |c| quote_ident(c[:column])  }.join(", ")})')").first["indexname"]
     end
@@ -639,6 +663,7 @@ module Dexter
       execute("SET client_min_messages = warning")
     end
 
+    # checks if the index already exists
     def index_exists?(index)
       indexes([index[:table]]).find { |i| i["columns"] == index[:columns] }
     end
