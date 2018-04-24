@@ -320,7 +320,11 @@ module Dexter
         end
       end
 
-      savings_ratio = (1 - @min_cost_savings_pct / 100.0)
+      # pass what we have through zaman's algorithm
+      # params: 
+      result = 'python zaman.py queries, tables, column(tables), indexes(tables)'
+
+      #savings_ratio = (1 - @min_cost_savings_pct / 100.0)
 
       queries.each do |query|
         if query.explainable? && query.high_cost?

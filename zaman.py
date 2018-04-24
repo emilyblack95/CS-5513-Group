@@ -4,11 +4,14 @@ import numpy as np
 """
 Re-implemented version of Zaman's auto-indexing clustering algorithm in Python.
 Originally written in Java.
-Authors: Emily Black, Charlie Liu
+Authors: Emily Black
 Thesis: http://ieeexplore.ieee.org/abstract/document/1333569/
 """
 
 """Initialized variables"""
+inputParameters = str(sys.argv) #reads parameter input from Ruby
+
+logData = inputParameters[0]
 numOfAttrs = 0
 numOfQueries = 0
 rowIndex = 0
@@ -16,17 +19,15 @@ columnIndex = 0
 numOfRows = 0
 thresholdOne = 0
 thresholdTwo = 0
-logData = []
 attributes = []
 currentIndexSet = []
 newIndexset = []
 indexesToAdd = []
 indexesToRemove = []
 
-#determined from the relationship between increase in table scan cost & performance gain due to re-indexing
-#use integrated postgresql workload
-#if(workload pattern has changed enough to hit our threshold):
-	#currentIndexSet = DB.getIndexSet()		    #get current index set
+
+
+#currentIndexSet = DB.getIndexSet()		    #get current index set
 	#wlSize = getCurrentWorkload()              #workload size
 	#logData = log.in() 						#read input from log on queries in the form of an ARRAY
 
