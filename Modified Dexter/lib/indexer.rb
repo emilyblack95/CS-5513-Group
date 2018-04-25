@@ -46,7 +46,6 @@ module Dexter
       SQL
     end
 
-    # TODO: add matrix creation, insertion, and k-means stuff here
     # general method that processes queries, does all method calls, and indexes
     def process_queries(queries)
       # reset hypothetical indexes
@@ -579,7 +578,7 @@ module Dexter
       JSON.parse(execute("EXPLAIN (FORMAT JSON) #{safe_statement(query)}").first["QUERY PLAN"], max_nesting: 1000).first["Plan"]
     end
 
-    # TODO for multicolumn indexes, use ordering
+    # for multicolumn indexes, use ordering
     def create_hypothetical_indexes_helper(columns_by_table, n, candidates)
       columns_by_table.each do |table, cols|
         # no reason to use btree index for json columns
