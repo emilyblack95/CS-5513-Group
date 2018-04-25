@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+
+require "dexter"
+begin
+  Dexter::Client.new(ARGV).perform
+rescue Dexter::Abort => e
+  abort e.message
+rescue Interrupt => e
+  # do nothing
+end
