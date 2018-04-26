@@ -18,15 +18,13 @@ if __name__ == "__main__":
 	logData = inputParameters[1] #queries. input data
 	attributes = inputParameters[2] #column(tables). list of all unique attributes
 	currentIndexSet = inputParameters[3] #indexes(tables). current index set across all tables.
-	#numOfRows =  #. number of rows for all tables in database.
+	columnsFromTables = inputParameters[4]
 	numOfAttrs = len(attributes)
 	numOfQueries = len(logData)
 	# other computational variables
 	rowIndex = 0
 	columnIndex = 0
 	newIndexset = []
-	indexesToAdd = []
-	indexesToRemove = []
 	# define thresholds to determine indexable candidate attributes
 	thresholdOne = numOfQueries / 2
 	thresholdTwo = numOfQueries / 4
@@ -75,34 +73,32 @@ if __name__ == "__main__":
 	# example: [(Q1,Q4), Q3, (Q2, Q5)], array of tuples
 	clusterResults = KMeans(n_clusters=3).fit(queryAttrMatrix)
 
-	#TODO: start here and finish
-	#add frequency totals to query-freq matrix
+	# add frequency totals to query-freq matrix
 	while columnIndex != numOfAttrs-1:
 		np.insert(queryFreqMatrix, queryFreqMatrix.size-2, queryFreqMatrix.sum(axis=columnIndex), axis=columnIndex)
 		columnIndex += 1
 
-	#reset our index for query-freq matrix insertion
+	# reset our index for query-freq matrix insertion
 	columnIndex = 0
 
-	#add frequency*T totals to query-freq matrix
+	# add frequency*T totals to query-freq matrix
 	while columnIndex != numOfAttrs-1:
+		#TODO: fix this
 		#numOfRows = attributes[columnIndex].getNumOfRowsInTable
 		np.insert(queryFreqMatrix, queryFreqMatrix.size-1, queryFreqMatrix.sum(axis=columnIndex) * numOfRows, axis=columnIndex)
 		columnIndex += 1
 
-	#use thresholds here
-	#newIndexSet = Find common candidate indexable attributes across all clusters/queries
+	# reset to use as random counter
+	columnIndex = 0
 
-	#filter out index sets
-	#create new indexes which aren’t in old index set
-	for index in newIndexSet:
-		if index not in currentIndexSet:
-			#indexesToAdd.append(new index i)
+	# compare frequencies to thresholds
+	while columnIndex != numOfAttrs and columnIndex != numOfQueries:
+		if queryFreqMatrix[queryFreqMatrix.size-2, columnIndex] > thresholdOne or queryFreqMatrix[queryFreqMatrix.size-1, columnIndex] > thresholdTwo:
+			# this assumes Dexter only needs column name
+			newIndexSet.append(attributes[columnIndex])
+			columnIndex += 1
 
-	#delete old indexes which aren’t in new index set
-	for index in currentIndexSet:
-		if index not in newIndexSet:
-			indexesToRemove.append(index)
+	#TODO Find common candidate indexable attributes across all clusters/queries
 
 	# return new index set
 	return newIndexset

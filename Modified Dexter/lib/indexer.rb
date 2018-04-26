@@ -424,7 +424,7 @@ module Dexter
       # run Zaman's algorithm and compare to Dexter's algorithm
       # TODO: finish
       # PARAMS:
-      new_indexes_2 = 'python zaman.py queries, column(tables), indexes(tables)'
+      new_indexes_2 = 'python zaman.py queries, column(tables), indexes(tables), columns'
 
       # since the main focus of this project is over Zaman's algorithm, new_indexes_2 takes preference.
       # computes intersection of both new_indexes sets
@@ -689,6 +689,7 @@ module Dexter
       indexes([index[:table]]).find { |i| i["columns"] == index[:columns] }
     end
 
+    # TODO modify this to return size of column, 4/26/18
     def columns(tables)
       columns = execute <<-SQL
         SELECT
