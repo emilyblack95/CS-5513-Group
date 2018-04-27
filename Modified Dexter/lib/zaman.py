@@ -75,7 +75,7 @@ if __name__ == "__main__":
 	# reset our index for query-freq matrix insertion
 	# columnIndex = 0
 
-	# TODO: can't do this atm, can get number of rows for each table
+	# Can't do this atm, can get number of rows for each table
 	# add frequency*T totals to query-freq matrix
 	# while columnIndex != numOfAttrs-1:
 		# numOfRows = attributes[columnIndex].getNumOfRowsInTable
@@ -98,9 +98,11 @@ if __name__ == "__main__":
 	# example: [(Q1,Q4), Q3, (Q2, Q5)], array of tuples
 	clusterResults = KMeans(n_clusters=3).fit(queryAttrMatrix)
 
-	# go through matrix, find attribute in each cluster that appears the most throughout the whole thing
-
-	#TODO Find common candidate indexable attributes across all clusters/queries
+	# Finds the most common candidate indexable attributes across all clusters/queries
+	for i in queryAttrMatrix[i]:
+		mostFreqValue = np.bincount(queryAttrMatrix[i]).argmax()
+		newIndexset.append(attributes[mostFreqValue])
+		i+=1
 
 	# return new index set
 	return newIndexset
