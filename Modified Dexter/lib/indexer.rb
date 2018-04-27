@@ -426,6 +426,9 @@ module Dexter
       # PARAMS:
       new_indexes_2 = 'python zaman.py queries, column(tables), indexes(tables), columns'
 
+      # TODO: cost estimation
+
+      
       # since the main focus of this project is over Zaman's algorithm, new_indexes_2 takes preference.
       # computes intersection of both new_indexes sets
       if new_indexes.empty?
