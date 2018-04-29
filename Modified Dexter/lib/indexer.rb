@@ -446,8 +446,6 @@ module Dexter
         end
       end
 
-      new_indexes.values.reject { |i| covered.include?([i[:table], i[:columns]]) }.sort_by(&:to_a)
-
     end
 
     # logs indexes to a map, with a corresponding table?
