@@ -18,7 +18,6 @@ if __name__ == "__main__":
 	logData = inputParameters[1] #queries. input data
 	attributes = inputParameters[2] #column(tables). list of all unique attributes
 	currentIndexSet = inputParameters[3] #indexes(tables). current index set across all tables.
-	columnsFromTables = inputParameters[4]
 	numOfAttrs = len(attributes)
 	numOfQueries = len(logData)
 	# other computational variables
