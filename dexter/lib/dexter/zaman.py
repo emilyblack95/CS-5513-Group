@@ -102,71 +102,73 @@ def main():
     queryFreqMatrix = np.ndarray(shape=(numOfQueries + 1, numOfAttrs), dtype=int)
 
     # populate query-attr matrix for clustering (will contain 1's and 0's)
-    for query in logData:
-        for attr in attributes:
-            # found occurrence
-            if query.find(attr) != -1:
-                np.insert(queryAttrMatrix, rowIndex, '1', axis=rowIndex)
-            # didn't find occurrence
-            else:
-                np.insert(queryAttrMatrix, rowIndex, '0', axis=rowIndex)
-            rowIndex += 1
+	for query in logData:
+		for attr in attributes:
+			# found occurrence
+			if query.find(attr) != -1:
+				np.insert(queryAttrMatrix, [rowIndex, columnIndex], '1')
+			# didn't find occurrence
+			else:
+				np.insert(queryAttrMatrix, [rowIndex, columnIndex], '0')
+            columnIndex += 1
+		rowIndex += 1
 
-    # reset our index for query-freq matrix insertion
-    rowIndex = 0
-
-    # populate query-freq matrix for freq calculations
-    for query in logData:
-        for attr in attributes:
-            # found occurrence
-            if query.find(attr) != -1:
-                np.insert(queryFreqMatrix, rowIndex, query.count(attr), axis=rowIndex)
-            # didn't find occurrence
-            else:
-                np.insert(queryAttrMatrix, rowIndex, '0', axis=rowIndex)
-            rowIndex += 1
-
-    # reset our index for next workload change
-    rowIndex = 0
-
-    # add frequency totals to query-freq matrix
-    while columnIndex != numOfAttrs - 1:
-        np.insert(queryFreqMatrix, queryFreqMatrix.size - 2, queryFreqMatrix.sum(axis=columnIndex), axis=columnIndex)
-        columnIndex += 1
-
-    # reset our index for query-freq matrix insertion
-    # columnIndex = 0
-
-    # Can't do this atm, can get number of rows for each table
-    # add frequency*T totals to query-freq matrix
-    # while columnIndex != numOfAttrs-1:
-    # numOfRows = attributes[columnIndex].getNumOfRowsInTable
-    # np.insert(queryFreqMatrix, queryFreqMatrix.size-1, queryFreqMatrix.sum(axis=columnIndex) * numOfRows, axis=columnIndex)
-    # columnIndex += 1
-
-    # reset to use as random counter
+	# reset our index for query-freq matrix insertion
+	rowIndex = 0
     columnIndex = 0
 
-    # compare frequencies to thresholds
-    while columnIndex != numOfAttrs and columnIndex != numOfQueries:
-        if queryFreqMatrix[queryFreqMatrix.size - 2, columnIndex] > thresholdOne:
-            # this assumes Dexter only needs column name
-            np.delete(queryAttrMatrix, attributes[columnIndex])
+	# populate query-freq matrix for freq calculations
+	for query in logData:
+		for attr in attributes:
+			# found occurrence
+			if query.find(attr) != -1:
+				np.insert(queryFreqMatrix, [rowIndex, columnIndex], query.count(attr))
+			# didn't find occurrence
+			else:
+				np.insert(queryAttrMatrix, [rowIndex, columnIndex], '0')
             columnIndex += 1
+        rowIndex += 1
+    
+    rowIndex = 0
+    columnIndex = 0
 
-    # cluster queries together based on relatively similar mentioned attributes - Artificial intelligence part
-    # number of clusters = k = n_clusters
-    # Zaman's research concluded that 3 was optimal k value
-    # example: [(Q1,Q4), Q3, (Q2, Q5)], array of tuples
-    clusterResults = KMeans(n_clusters=3).fit(queryAttrMatrix)
+	# add frequency totals to query-freq matrix
+	while columnIndex != numOfAttrs-1:
+		np.insert(queryFreqMatrix, [numOfQueries+1, columnIndex], queryFreqMatrix.sum(axis=columnIndex))
+		columnIndex += 1
 
-    # Finds the most common candidate indexable attributes across all clusters/queries
-    for i in clusterResults:
-        mostFreqValue = np.bincount(queryAttrMatrix[i]).argmax()
-        newIndexset.append(attributes[mostFreqValue])
-        i += 1
+	# reset our index for query-freq matrix insertion
+	# columnIndex = 0
 
-    # return new index set
+	# Can't do this atm, can get number of rows for each table
+	# add frequency*T totals to query-freq matrix
+	# while columnIndex != numOfAttrs-1:
+		# numOfRows = attributes[columnIndex].getNumOfRowsInTable
+		# np.insert(queryFreqMatrix, queryFreqMatrix.size-1, queryFreqMatrix.sum(axis=columnIndex) * numOfRows, axis=columnIndex)
+		# columnIndex += 1
+
+	# reset to use as random counter
+	columnIndex = 0
+
+	# compare frequencies to thresholds
+	while columnIndex != numOfAttrs and columnIndex != numOfQueries:
+		if queryFreqMatrix[numOfQueries+1, columnIndex] < thresholdOne:
+			np.delete(queryAttrMatrix, axix=columnIndex)
+			columnIndex += 1
+
+	# cluster queries together based on relatively similar mentioned attributes - Artificial intelligence part
+	# number of clusters = k = n_clusters
+	# Zaman's research concluded that 3 was optimal k value
+	# example: [(Q1,Q4), Q3, (Q2, Q5)], array of tuples
+	clusterResults = KMeans(n_clusters=3).fit(queryAttrMatrix)
+
+	# Finds the most common candidate indexable attributes across all clusters/queries
+	for i in clusterResults:
+		mostFreqValue = np.bincount(clusterResults[i]).argmax()
+		newIndexset.append(mostFreqValue)
+		i+=1
+
+	# return new index set
 
     pprint.pprint(newIndexset)
     return newIndexset
