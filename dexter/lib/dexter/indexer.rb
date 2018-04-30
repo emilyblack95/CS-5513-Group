@@ -468,7 +468,6 @@ module Dexter
           f.write(queries_array.to_json)
         end
 
-        # TODO : table
         # create array to store tables names
         table_names = Array.new
 
@@ -485,26 +484,20 @@ module Dexter
 
         print(zamans_indexes)
 
-        # new_indexes_2 = zamans_indexes
+        new_indexes_2 = zamans_indexes
       end
 
-
-      # TODO: output data into json
-
-
       # TODO: cost estimation
-
-
       # since the main focus of this project is over Zaman's algorithm, new_indexes_2 takes preference.
       # computes intersection of both new_indexes sets
-      # if new_indexes.empty?
-      #   new_indexes = new_indexes_2
-      # elsif new_indexes_2.empty?
-      #   new_indexes = new_indexes
-      # else
-      #   # TODO: FIX THIS
-      #   new_indexes = new_indexes & new_indexes_2
-      # end
+      if new_indexes.empty?
+        new_indexes = new_indexes_2
+      elsif new_indexes_2.empty?
+        new_indexes = new_indexes
+      else
+        # TODO: FIX THIS
+        # new_indexes = new_indexes & new_indexes_2
+      end
 
 
       # filter out covered indexes
