@@ -126,7 +126,7 @@ def main():
                 np.insert(queryFreqMatrix, [rowIndex, columnIndex], query.count(attr))
             # didn't find occurrence
             else:
-                np.insert(queryAttrMatrix, [rowIndex, columnIndex], '0')
+                np.insert(queryFreqMatrix, [rowIndex, columnIndex], '0')
             columnIndex += 1
         rowIndex += 1
 
