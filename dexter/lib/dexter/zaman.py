@@ -131,7 +131,8 @@ def main():
 
     # add frequency totals to query-freq matrix
     while columnIndex != numOfAttrs - 1:
-        np.insert(queryFreqMatrix, queryFreqMatrix.size - 2, queryFreqMatrix.sum(axis=columnIndex))
+        # np.insert(queryFreqMatrix, queryFreqMatrix.size - 2, queryFreqMatrix.sum(axis=columnIndex))
+        np.insert(queryFreqMatrix, [columnIndex, numOfQueries + 1], queryFreqMatrix.sum(axis=columnIndex))
         columnIndex += 1
 
     # reset our index for query-freq matrix insertion
