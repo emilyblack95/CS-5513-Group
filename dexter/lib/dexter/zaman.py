@@ -1,6 +1,6 @@
 from sklearn.cluster import KMeans
 import numpy as np
-# import psycopg2
+import psycopg2
 import json
 import pprint
 
@@ -29,48 +29,47 @@ def get_queries():
 
 # retrieve and parse tables json files from dexter
 # then query the db to retrieve all attribute names
-def get_attributes(dragon):
+def get_attributes():
     ## hardcoded the attributes to test locally
-    if dragon:
-        hardcode = ['o_orderkey', 'o_custkey', 'o_orderstatus', 'o_totalprice', 'o_orderdate', 'o_orderpriority',
-                    'o_clerk', 'o_shippriority', 'o_comment', 'l_orderkey', 'l_partkey', 'l_suppkey', 'l_linenumber',
-                    'l_quantity', 'l_extendedprice', 'l_discount', 'l_tax', 'l_returnflag', 'l_linestatus',
-                    'l_shipdate', 'l_commitdate', 'l_receiptdate', 'l_shipinstruct', 'l_shipmode', 'l_comment',
-                    'ps_partkey', 'ps_suppkey', 'ps_availqty', 'ps_supplycost', 'ps_comment', 'c_custkey', 'c_name',
-                    'c_address', 'c_nationkey', 'c_phone', 'c_acctbal', 'c_mktsegment', 'c_comment', 's_suppkey',
-                    's_name', 's_address', 's_nationkey', 's_phone', 's_acctbal', 's_comment', 'n_nationkey', 'n_name',
-                    'n_regionkey', 'n_comment', 'r_regionkey', 'r_name', 'r_comment', 'p_partkey', 'p_name', 'p_mfgr',
-                    'p_brand', 'p_type', 'p_size', 'p_container', 'p_retailprice', 'p_comment']
-        return hardcode
+    # hardcode = ['o_orderkey', 'o_custkey', 'o_orderstatus', 'o_totalprice', 'o_orderdate', 'o_orderpriority',
+    #             'o_clerk', 'o_shippriority', 'o_comment', 'l_orderkey', 'l_partkey', 'l_suppkey', 'l_linenumber',
+    #             'l_quantity', 'l_extendedprice', 'l_discount', 'l_tax', 'l_returnflag', 'l_linestatus',
+    #             'l_shipdate', 'l_commitdate', 'l_receiptdate', 'l_shipinstruct', 'l_shipmode', 'l_comment',
+    #             'ps_partkey', 'ps_suppkey', 'ps_availqty', 'ps_supplycost', 'ps_comment', 'c_custkey', 'c_name',
+    #             'c_address', 'c_nationkey', 'c_phone', 'c_acctbal', 'c_mktsegment', 'c_comment', 's_suppkey',
+    #             's_name', 's_address', 's_nationkey', 's_phone', 's_acctbal', 's_comment', 'n_nationkey', 'n_name',
+    #             'n_regionkey', 'n_comment', 'r_regionkey', 'r_name', 'r_comment', 'p_partkey', 'p_name', 'p_mfgr',
+    #             'p_brand', 'p_type', 'p_size', 'p_container', 'p_retailprice', 'p_comment']
 
-    #     # parse tables json file to get db tables from dexter
-    # tables = json.load(open('tables.json'))
-    #
-    # attributes = []
-    #
-    # # connection info
-    # conn_string = "host='localhost' port=15432 dbname='tpch' user='postgres' password='postgres'"
-    #
-    # # connect to db
-    # conn = psycopg2.connect(conn_string)
-    # # connection cursor to perform queries
-    # cursor = conn.cursor()
-    #
-    # print("Connected!\n")
-    #
-    # # execute query
-    # for table in tables:
-    #     query = "SELECT * FROM %s WHERE FALSE" % table
-    #     cursor.execute(query)
-    #
-    #     # get all attribute names in table
-    #     for i in range(len(cursor.description)):
-    #         attributes.append(cursor.description[i][0])
-    #
-    # conn.close()
-    #
-    # pprint.pprint(attributes)
-    # return attributes
+    # parse tables json file to get db tables from dexter
+    tables = json.load(open('tables.json'))
+
+    attributes = []
+
+    # connection info
+    conn_string = "host='localhost' port=15432 dbname='tpch' user='postgres' password='postgres'"
+
+    # connect to db
+    conn = psycopg2.connect(conn_string)
+    # connection cursor to perform queries
+    cursor = conn.cursor()
+
+    print("Connected!\n")
+
+    # execute query
+    for table in tables:
+        query = "SELECT * FROM %s WHERE FALSE" % table
+        cursor.execute(query)
+
+        # get all attribute names in table
+        for i in range(len(cursor.description)):
+            attributes.append(cursor.description[i][0])
+
+    # close db connection
+    conn.close()
+
+    pprint.pprint(attributes)
+    return attributes
 
 
 # Main method
@@ -101,6 +100,8 @@ def main():
 
     # query-frequency matrix, 2 extra rows for freq, freq*T
     queryFreqMatrix = np.ndarray(shape=(numOfQueries + 1, numOfAttrs), dtype=int)
+
+    pprint.pprint(queryFreqMatrix)
 
     # populate query-attr matrix for clustering (will contain 1's and 0's)
     for query in logData:
@@ -169,10 +170,11 @@ def main():
     newIndexset.append(mostFreqValue)
     i += 1
 
-    # return new index set
+    # return new index set by converting list to json and printing to console
+    # dexter will retrieve console output as a string where it will be able to parse the json output
+    print(json.dumps(newIndexset))
 
-    pprint.pprint(newIndexset)
-    return newIndexset
+    # return newIndexset
 
 
 if __name__ == "__main__":

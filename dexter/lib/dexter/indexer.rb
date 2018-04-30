@@ -302,7 +302,15 @@ module Dexter
 
     ###
     #
-    #  TODO:TODO
+    #  CS 5513 project modifications -
+    #     Modified the index selection method to load our Zaman's implementation
+    #     Since we dont know how ruby really works, we are boot strapping our implementation (in python)
+    #     onto dexter itself. This is done by executing a shell command (shelling out) through ruby (marked below), which
+    #     executes `python zaman.py` through the command line. Since direct data communication
+    #     passing variables and arguments) is not possible between the 2 processes, this function is also
+    #     modified to output the necessary data to json. This allows our python script to obtain the data
+    #     seamlessly. The output of zaman.py will be propagated back to dexter as a json and the results are parsed
+    #     and stored in the set variable called new_indexes_2.
     #
     ###
 
@@ -432,21 +440,15 @@ module Dexter
 
       ###
       #
-      #  Project modifications here
+      #  Project modifications start
       #
       ###
 
-      # run Zaman's algorithm and compare to Dexter's algorithm
-      # TODO: finish
-
       # init set of indexes
-      new_indexes_2 = nil
+      new_indexes_2 = Set.new
 
-      # change working directory to specified path
+      # change working directory to specified path with zaman py
       Dir.chdir('/home/vagrant/dexter/lib/dexter') do
-        # zamans_indexes = `python zaman.py queries, column(tables), indexes(tables), columns`
-        zamans_indexes = `python test.py queries`
-
         # create array to store queries from log file
         queries_array = Array.new
 
@@ -482,9 +484,27 @@ module Dexter
           f.write(table_names.to_json)
         end
 
-        print(zamans_indexes)
+        puts('Data written to json')
 
-        new_indexes_2 = zamans_indexes
+        # shell out / call zaman python script through sys commands
+        # using back ticks ``
+        puts('Shelling out to zaman.py')
+
+        # error handling for zaman py response
+        begin
+          zamans_indexes = `python zaman.py queries`
+          puts('zaman.py has executed')
+
+          # parse json output to set
+          zamans_indexes = JSON.parse(zamans_indexes)
+
+          # assign suggested indexes from zaman.py to new_indexes_2 set
+          new_indexes_2 = zamans_indexes
+          puts('suggested indexes received')
+
+        rescue
+          puts('Error executing zaman.py')
+        end
       end
 
       # TODO: cost estimation
@@ -495,9 +515,15 @@ module Dexter
       elsif new_indexes_2.empty?
         new_indexes = new_indexes
       else
-        # TODO: FIX THIS
-        # new_indexes = new_indexes & new_indexes_2
+        # set intersection between zamans suggested indices and dexters suggested indices
+        new_indexes = new_indexes & new_indexes_2
       end
+
+      ###
+      #
+      #  Project modifications end here
+      #
+      ###
 
 
       # filter out covered indexes
@@ -508,7 +534,6 @@ module Dexter
         end
       end
 
-      # TODO: (Dragon) check this
       new_indexes.values.reject {|i| covered.include?([i[:table], i[:columns]])}.sort_by(&:to_a)
 
     end
