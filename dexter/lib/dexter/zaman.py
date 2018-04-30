@@ -79,7 +79,7 @@ def main():
     """Initialized variables"""
     # parse data from json files exported from dexter
     logData = get_queries()
-    attributes = get_attributes()
+    attributes = get_attributes(True)
 
     numOfAttrs = len(attributes)
     numOfQueries = len(logData)
