@@ -68,7 +68,6 @@ def get_attributes():
     # close db connection
     conn.close()
 
-    pprint.pprint(attributes)
     return attributes
 
 
@@ -77,12 +76,12 @@ def main():
     """Initialized variables"""
     # parse data from json files exported from dexter
     logData = get_queries()
-    attributes = get_attributes(True)
+    attributes = get_attributes()
 
     numOfAttrs = len(attributes)
-    print(numOfAttrs)
+
     numOfQueries = len(logData)
-    print(numOfQueries)
+
     # other computational variables
     rowIndex = 0
     columnIndex = 0
@@ -100,8 +99,6 @@ def main():
 
     # query-frequency matrix, 2 extra rows for freq, freq*T
     queryFreqMatrix = np.ndarray(shape=(numOfQueries + 1, numOfAttrs), dtype=int)
-
-    pprint.pprint(queryFreqMatrix)
 
     # populate query-attr matrix for clustering (will contain 1's and 0's)
     for query in logData:
