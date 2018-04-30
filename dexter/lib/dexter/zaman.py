@@ -44,34 +44,34 @@ def get_attributes(dragon):
                     'p_brand', 'p_type', 'p_size', 'p_container', 'p_retailprice', 'p_comment']
         return hardcode
 
-        # parse tables json file to get db tables from dexter
-    tables = json.load(open('tables.json'))
-
-    attributes = []
-
-    # connection info
-    conn_string = "host='localhost' port=15432 dbname='tpch' user='postgres' password='postgres'"
-
-    # connect to db
-    conn = psycopg2.connect(conn_string)
-    # connection cursor to perform queries
-    cursor = conn.cursor()
-
-    print("Connected!\n")
-
-    # execute query
-    for table in tables:
-        query = "SELECT * FROM %s WHERE FALSE" % table
-        cursor.execute(query)
-
-        # get all attribute names in table
-        for i in range(len(cursor.description)):
-            attributes.append(cursor.description[i][0])
-
-    conn.close()
-
-    pprint.pprint(attributes)
-    return attributes
+    #     # parse tables json file to get db tables from dexter
+    # tables = json.load(open('tables.json'))
+    #
+    # attributes = []
+    #
+    # # connection info
+    # conn_string = "host='localhost' port=15432 dbname='tpch' user='postgres' password='postgres'"
+    #
+    # # connect to db
+    # conn = psycopg2.connect(conn_string)
+    # # connection cursor to perform queries
+    # cursor = conn.cursor()
+    #
+    # print("Connected!\n")
+    #
+    # # execute query
+    # for table in tables:
+    #     query = "SELECT * FROM %s WHERE FALSE" % table
+    #     cursor.execute(query)
+    #
+    #     # get all attribute names in table
+    #     for i in range(len(cursor.description)):
+    #         attributes.append(cursor.description[i][0])
+    #
+    # conn.close()
+    #
+    # pprint.pprint(attributes)
+    # return attributes
 
 
 # Main method
@@ -106,10 +106,10 @@ def main():
         for attr in attributes:
             # found occurrence
             if query.find(attr) != -1:
-                np.insert(queryAttrMatrix, rowIndex, '1')
+                np.insert(queryAttrMatrix, rowIndex, '1', axis=rowIndex)
             # didn't find occurrence
             else:
-                np.insert(queryAttrMatrix, rowIndex, '0')
+                np.insert(queryAttrMatrix, rowIndex, '0', axis=rowIndex)
             rowIndex += 1
 
     # reset our index for query-freq matrix insertion
@@ -120,10 +120,10 @@ def main():
         for attr in attributes:
             # found occurrence
             if query.find(attr) != -1:
-                np.insert(queryFreqMatrix, rowIndex, query.count(attr))
+                np.insert(queryFreqMatrix, rowIndex, query.count(attr), axis=rowIndex)
             # didn't find occurrence
             else:
-                np.insert(queryAttrMatrix, rowIndex, '0')
+                np.insert(queryAttrMatrix, rowIndex, '0', axis=rowIndex)
             rowIndex += 1
 
     # reset our index for next workload change
@@ -131,8 +131,7 @@ def main():
 
     # add frequency totals to query-freq matrix
     while columnIndex != numOfAttrs - 1:
-        # np.insert(queryFreqMatrix, queryFreqMatrix.size - 2, queryFreqMatrix.sum(axis=columnIndex))
-        np.insert(queryFreqMatrix, [columnIndex, numOfQueries + 1], queryFreqMatrix.sum(axis=columnIndex))
+        np.insert(queryFreqMatrix, queryFreqMatrix.size - 2, queryFreqMatrix.sum(axis=columnIndex), axis=columnIndex)
         columnIndex += 1
 
     # reset our index for query-freq matrix insertion
@@ -168,6 +167,8 @@ def main():
         i += 1
 
     # return new index set
+
+    pprint.pprint(newIndexset)
     return newIndexset
 
 
